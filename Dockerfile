@@ -1,22 +1,22 @@
 FROM node:16-alpine
 
-# Install real git
 RUN apk update && apk add git
 
-WORKDIR /app
-COPY package.json ./
-
-# Create a fake "git" wrapper that intercepts and kills the "git config core.hooksPath" command
+# Block Git hooks
 RUN echo '#!/bin/sh' > /usr/local/bin/git && \
     echo 'if [ "$1" = "config" ] && [ "$2" = "core.hooksPath" ]; then exit 0; fi' >> /usr/local/bin/git && \
     echo 'exec /usr/bin/git "$@"' >> /usr/local/bin/git && \
     chmod +x /usr/local/bin/git
 
-# Run install 
+WORKDIR /app
+COPY package.json ./
+
+# Install all packages normally
 RUN npm install --legacy-peer-deps
 
-# Force manual compilation of the buggy translation package
-RUN cd node_modules/rita-google-translate-api && npm install && npm run build
+# Create the missing directory and dump a raw JavaScript version of the translation API into it
+RUN mkdir -p node_modules/rita-google-translate-api/dist/cjs && \
+    echo 'const translate = require("@vitalets/google-translate-api"); module.exports = translate;' > node_modules/rita-google-translate-api/dist/cjs/index.js
 
 COPY . .
 EXPOSE 3000
