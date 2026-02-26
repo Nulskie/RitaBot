@@ -2,7 +2,7 @@
 // -----------------
 // Global variables
 // -----------------
-
+require('../keep_alive.js');
 // Codebeat:disable[LOC,ABC,BLOCK_NESTING]
 const time = {
    "long": 60000,
