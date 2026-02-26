@@ -9,15 +9,19 @@ RUN echo '#!/bin/sh' > /usr/local/bin/git && \
     chmod +x /usr/local/bin/git
 
 WORKDIR /app
-COPY package.json ./
+COPY . .
 
-# Install all packages normally
+# 1. Force uninstall the broken package from the bot's config
+RUN npm uninstall rita-google-translate-api --save
+
+# 2. Install the OFFICIAL, working translation package
+RUN npm install @vitalets/google-translate-api@8.0.0 --save
+
+# 3. Rewrite RitaBot's source code to use the official package instead of the broken one
+RUN sed -i 's/require("rita-google-translate-api")/require("@vitalets/google-translate-api")/g' src/core/translate.js
+
+# Install the rest of the dependencies normally
 RUN npm install --legacy-peer-deps
 
-# Create the missing directory and dump a raw CommonJS version of the API into it
-RUN mkdir -p node_modules/rita-google-translate-api/dist/cjs && \
-    echo 'const translate = require("@vitalets/google-translate-api"); module.exports = translate;' > node_modules/rita-google-translate-api/dist/cjs/index.cjs
-
-COPY . .
 EXPOSE 3000
 CMD ["npm", "start"]
