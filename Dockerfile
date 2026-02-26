@@ -1,19 +1,19 @@
 FROM node:16-alpine
 RUN apk update && apk add git
 
-# Globally tell git to ignore any hooks
-RUN git config --global core.hooksPath /dev/null
+# Force git to use HTTPS instead of SSH/Git protocols for everything
+RUN git config --global url."https://github.com/".insteadOf git://github.com/
+RUN git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
 WORKDIR /app
 COPY package.json ./
 
-# Change ownership to the built-in 'node' user so NPM doesn't run as root
-RUN chown -R node:node /app
-USER node
+# Initialize a git repo in the app so hooks don't panic
+RUN git init
 
-# Run install as the node user with all safety bypasses
-RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund
+# Install packages with ALL protections turned off, completely ignoring scripts
+RUN npm install --omit=dev --ignore-scripts --no-audit --no-fund --legacy-peer-deps
 
-COPY --chown=node:node . .
+COPY . .
 EXPOSE 3000
 CMD ["npm", "start"]
