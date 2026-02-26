@@ -12,8 +12,11 @@ RUN echo '#!/bin/sh' > /usr/local/bin/git && \
     echo 'exec /usr/bin/git "$@"' >> /usr/local/bin/git && \
     chmod +x /usr/local/bin/git
 
-# Run a full install so packages can build their 'dist' folders
+# Run install 
 RUN npm install --legacy-peer-deps
+
+# Force manual compilation of the buggy translation package
+RUN cd node_modules/rita-google-translate-api && npm install && npm run build
 
 COPY . .
 EXPOSE 3000
