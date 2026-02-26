@@ -12,8 +12,8 @@ RUN echo '#!/bin/sh' > /usr/local/bin/git && \
     echo 'exec /usr/bin/git "$@"' >> /usr/local/bin/git && \
     chmod +x /usr/local/bin/git
 
-# Run install WITHOUT --ignore-scripts so the translator package can build itself
-RUN npm install --omit=dev --legacy-peer-deps
+# Run a full install so packages can build their 'dist' folders
+RUN npm install --legacy-peer-deps
 
 COPY . .
 EXPOSE 3000
