@@ -14,9 +14,9 @@ COPY package.json ./
 # Install all packages normally
 RUN npm install --legacy-peer-deps
 
-# Create the missing directory and dump a raw JavaScript version of the translation API into it
+# Create the missing directory and dump a raw CommonJS version of the API into it
 RUN mkdir -p node_modules/rita-google-translate-api/dist/cjs && \
-    echo 'const translate = require("@vitalets/google-translate-api"); module.exports = translate;' > node_modules/rita-google-translate-api/dist/cjs/index.js
+    echo 'const translate = require("@vitalets/google-translate-api"); module.exports = translate;' > node_modules/rita-google-translate-api/dist/cjs/index.cjs
 
 COPY . .
 EXPOSE 3000
