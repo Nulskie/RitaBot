@@ -11,17 +11,15 @@ RUN echo '#!/bin/sh' > /usr/local/bin/git && \
 WORKDIR /app
 COPY . .
 
-# 1. Force uninstall the broken package from the bot's config
-RUN npm uninstall rita-google-translate-api --save
+# 1. Install all deps first (so package-lock is respected)
+RUN npm install --legacy-peer-deps
 
-# 2. Install the OFFICIAL, working translation package
+# 2. Force-replace the broken package AFTER full install
+RUN npm uninstall rita-google-translate-api --save
 RUN npm install @vitalets/google-translate-api@8.0.0 --save
 
-# 3. Rewrite RitaBot's source code to use the official package instead of the broken one
-RUN sed -i 's/require("rita-google-translate-api")/require("@vitalets/google-translate-api")/g' src/core/translate.js
-
-# Install the rest of the dependencies normally
-RUN npm install --legacy-peer-deps
+# 3. Patch the source to use the correct package
+RUN sed -i 's/require("rita-google-translate-api")/require("@vitalets\/google-translate-api")/g' src/core/translate.js
 
 EXPOSE 3000
 CMD ["npm", "start"]
